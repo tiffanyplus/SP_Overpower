@@ -11,6 +11,3 @@ Use these commands for configuration:
 	/op
 	/overpower
 
-### Download
-
-[Download ZIP](https://github.com/EinBaum/SP_Overpower/releases "Download ZIP")
