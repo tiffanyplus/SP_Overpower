@@ -156,6 +156,8 @@ function SP_OP_OnLoad()
 	this:RegisterEvent("ADDON_LOADED")
 	this:RegisterEvent("CHAT_MSG_COMBAT_SELF_MISSES")
 	this:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE")
+	this:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES")  -- Event for enemy parries
+	this:RegisterEvent("CHAT_MSG_COMBAT_HOSTILEPLAYER_MISSES")      -- Event for player parries
 
 	-- Only for Execute dodges (server bug?)
 	this:RegisterEvent("CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF")
@@ -177,23 +179,31 @@ function SP_OP_OnEvent()
 		end
 
 	elseif (event == "CHAT_MSG_COMBAT_SELF_MISSES") then
-		local a,b,str = string.find(arg1, "You attack. (.+) dodges.")
+		local a, b, str = string.find(arg1, "You attack. (.+) dodges.")
 		if a then
 			ResetTimer(str)
 		end
 
-	elseif (event == "CHAT_MSG_SPELL_SELF_DAMAGE"
-		or  event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF") then
+	elseif (event == "CHAT_MSG_COMBAT_CREATURE_VS_SELF_MISSES"
+		or event == "CHAT_MSG_COMBAT_HOSTILEPLAYER_MISSES") then
+		-- Check if the player parried an attack from either an NPC or a player
+		local a, b = string.find(arg1, "(.+) attacks. You parry")
+		if a then
+			ResetTimer("Parry")  -- Reset with "Parry" as the ability name
+		end
 
-		local a,b,_,str = string.find(arg1, "Your (.+) was dodged by (.+).")
+	elseif (event == "CHAT_MSG_SPELL_SELF_DAMAGE"
+		or event == "CHAT_MSG_SPELL_DAMAGESHIELDS_ON_SELF") then
+
+		local a, b, _, str = string.find(arg1, "Your (.+) was dodged by (.+).")
 
 		if a then
 			ResetTimer(str)
 		else
-			a,b,str = string.find(arg1, "Your (.+) hits")
-			if not str then a,b,str = string.find(arg1, "Your (.+) crits") end
-			if not str then a,b,str = string.find(arg1, "Your (.+) is parried") end
-			if not str then a,b,str = string.find(arg1, "Your (.+) missed") end
+			a, b, str = string.find(arg1, "Your (.+) hits")
+			if not str then a, b, str = string.find(arg1, "Your (.+) crits") end
+			if not str then a, b, str = string.find(arg1, "Your (.+) is parried") end
+			if not str then a, b, str = string.find(arg1, "Your (.+) missed") end
 			if str == "Overpower" then
 				op_timeLeft = 0
 				UpdateDisplay()
